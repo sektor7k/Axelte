@@ -67,3 +67,38 @@ pub async fn signup(
 
     Ok(StatusCode::CREATED)
 }
+
+pub async fn login(
+    State(pool): State<MySqlPool>,
+    Json(payload):Json<LoginPayload>
+) -> Result<StatusCode, (StatusCode, Json<serde_json::Value>)> {
+
+    let user = sqlx::query!(
+        "SELECT email, password FROM users WHERE email = ?",
+        payload.email
+    )
+    .fetch_one(&pool)
+    .await
+    .map_err(|_| {
+        (
+            StatusCode::UNAUTHORIZED,
+            Json(json!({ "message": "Invalid email" })),
+        )
+    })?;
+
+    let is_valid_password = bcrypt::verify(payload.password, &user.password)
+        .map_err(|_| {
+            (
+                StatusCode::UNAUTHORIZED,
+                Json(json!({ "message": "Invalid password" })),
+            )
+        })?;
+
+    if !is_valid_password {
+        return Err((StatusCode::UNAUTHORIZED, Json(json!({ "message": "Invalid password" }))));
+    }
+
+    let token = generate_token(&user.id);
+
+    Ok(StatusCode::OK)  
+}
