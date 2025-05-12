@@ -1,15 +1,28 @@
-<script>
+<script lang="ts">
     import { Button } from "$lib/components/ui/button";
     import { Input } from "$lib/components/ui/input";
     import { Label } from "$lib/components/ui/label";
     import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "$lib/components/ui/card";
-    
+    import axios from "axios";
+    import { toast } from "svelte-sonner";
+    import { goto } from "$app/navigation";
     let email = "";
     let password = "";
 
-    function handleSubmit() {
-        // Handle login logic here
-        console.log({ email, password });
+    async function handleSubmit() {
+        try {
+            const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/auth/login`, {
+                email,
+                password
+            },
+            {
+                withCredentials: true, // for write cookie to browser helellel :)
+            });
+            toast.success("Login successful!");
+            goto("/");
+        } catch (error:any) {
+            toast.error(error.response.data.message|| "Something went wrong!");
+        }
     }
 </script>
 
