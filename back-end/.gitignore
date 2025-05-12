@@ -23,6 +23,8 @@
 # Windows
 Thumbs.db
 
+.env
+
 # Logs
 *.log
 
