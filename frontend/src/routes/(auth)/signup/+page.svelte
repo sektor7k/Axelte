@@ -1,22 +1,39 @@
-<script>
+<script lang="ts">
     import { Button } from "$lib/components/ui/button";
     import { Input } from "$lib/components/ui/input";
     import { Label } from "$lib/components/ui/label";
     import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "$lib/components/ui/card";
     import { toast } from "svelte-sonner";
+    import axios from "axios";
+    import { goto } from "$app/navigation";
     
-    let name = "";
+    let username = "";
     let email = "";
     let password = "";
     let confirmPassword = "";
+    let isLoading = false;
 
-    function handleSubmit() {
-        // Handle signup logic here
+    async function handleSubmit() {
         if (password !== confirmPassword) {
             toast.error("Passwords do not match!");
             return;
         }
-        console.log({ name, email, password });
+
+        try {
+            isLoading = true;
+            const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/auth/signup`, {
+                username,
+                email,
+                password
+            });           
+                toast.success("Account created successfully!");
+                goto("/login");
+          
+        } catch (error:any) {
+            toast.error(error.response.data.message|| "Something went wrong!");
+        } finally {
+            isLoading = false;
+        }
     }
 </script>
 
@@ -29,13 +46,14 @@
             <form on:submit|preventDefault={handleSubmit}>
                 <div class="space-y-4">
                     <div class="space-y-2">
-                        <Label for="name">Full Name</Label>
+                        <Label for="username">Username</Label>
                         <Input 
                             type="text" 
-                            id="name" 
-                            placeholder="Enter your full name" 
-                            bind:value={name}
+                            id="username" 
+                            placeholder="Enter your username" 
+                            bind:value={username}
                             required
+                            disabled={isLoading}
                         />
                     </div>
                     <div class="space-y-2">
@@ -46,6 +64,7 @@
                             placeholder="Enter your email" 
                             bind:value={email}
                             required
+                            disabled={isLoading}
                         />
                     </div>
                     <div class="space-y-2">
@@ -56,6 +75,7 @@
                             placeholder="Create a password" 
                             bind:value={password}
                             required
+                            disabled={isLoading}
                         />
                     </div>
                     <div class="space-y-2">
@@ -66,10 +86,11 @@
                             placeholder="Confirm your password" 
                             bind:value={confirmPassword}
                             required
+                            disabled={isLoading}
                         />
                     </div>
-                    <Button type="submit" class="w-full">
-                        Create Account
+                    <Button type="submit" class="w-full" disabled={isLoading}>
+                        {isLoading ? "Creating Account..." : "Create Account"}
                     </Button>
                 </div>
             </form>
