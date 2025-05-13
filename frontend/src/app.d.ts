@@ -2,6 +2,21 @@
 // for information about these interfaces
 declare global {
 	namespace App {
+		interface Locals {
+			user: {
+				id: string;
+				username: string;
+				email: string;
+			} | null;
+		}
+		interface PageData {
+			user: {
+				id: string;
+				username: string;
+				email: string;
+			} 
+		}
+
 		// interface Error {}
 		// interface Locals {}
 		// interface PageData {}
@@ -10,4 +25,4 @@ declare global {
 	}
 }
 
-export {};
+export { };
