@@ -5,11 +5,15 @@ mod models;
 use std::env;
 
 use axum::{
-    http::{header, HeaderValue, Method}, routing::get, Router
+    http::{header, HeaderValue, Method}, middleware::from_fn_with_state, routing::get, Extension, Router
 };
 use tokio::net::TcpListener;
-use routes::auth::auth_routes;
+use tower_cookies::CookieManagerLayer;
 use tower_http::cors::{Any, CorsLayer};
+
+use routes::auth::auth_routes;
+use handlers::auth_handlers::me;
+use handlers::jwt::auth_middleware;
 
 
 #[tokio::main]
@@ -22,12 +26,21 @@ async fn main(){
 
     let cors = CorsLayer::new()
     .allow_origin(client_url.parse::<HeaderValue>().unwrap()) 
-    .allow_methods([Method::POST, Method::GET])
-    .allow_headers([header::CONTENT_TYPE])
+    .allow_methods([Method::POST, Method::GET, Method::OPTIONS])
+    .allow_headers([header::CONTENT_TYPE, header::COOKIE])
     .allow_credentials(true); 
+
+    let protected = Router::new()
+        .route("/me", get(me))
+        // auth_middleware ile koru
+        .layer(from_fn_with_state(pool.clone(), auth_middleware));
+
     
     let app = Router::new()
     .nest("/auth", auth_routes(pool.clone()))
+    .nest("/api", protected)
+     .layer(CookieManagerLayer::new())
+    .layer(Extension(pool.clone()))
     .layer(cors);
 
 
