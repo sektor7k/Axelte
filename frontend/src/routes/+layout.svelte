@@ -12,7 +12,7 @@
 	<meta name="keywords" content={siteConfig.keywords.join(', ')} />
 	
 	<!-- Open Graph -->
-	<meta property="og:title" content={siteConfig.name} />
+	<meta property="og:title" content={siteConfig.name} /> 
 	<meta property="og:description" content={siteConfig.description} />
 	<meta property="og:image" content={siteConfig.ogImage} />
 	<meta property="og:url" content={siteConfig.url} />
