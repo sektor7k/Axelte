@@ -87,7 +87,7 @@ pub async fn auth_middleware(
 
     // 5. DB'den kullanıcıyı çek
     let row = match sqlx::query!(
-        "SELECT id, username, email FROM users WHERE id = ?",
+        "SELECT id, username, email, avatar, role FROM users WHERE id = ?",
         user_id
     )
     .fetch_one(&pool)
@@ -102,6 +102,8 @@ pub async fn auth_middleware(
         id:       row.id,
         username: row.username,
         email:    row.email,
+        avatar:   row.avatar,
+        role:     row.role,
     });
 
     // 7. Handler zincirine devam et

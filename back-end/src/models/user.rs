@@ -5,4 +5,6 @@ pub struct User {
     pub id: String,
     pub username: String,
     pub email: String,
+    pub avatar: String,
+    pub role: String,
 }
