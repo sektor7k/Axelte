@@ -10,23 +10,23 @@
     import { goto } from "$app/navigation";
     import { toast } from "svelte-sonner";
 
-    export let data: { user: { id: string; username: string; email: string } };
+    export let data: { user: { id: string; username: string; email: string; avatar: string } };
     const { user } = data;
 
-    // Avatar URL'sini oluştur
-    const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}&background=random`;
 
     async function logout() {
         try {
             let response = await axios.post(
                 `${import.meta.env.VITE_SERVER_URL}/auth/logout`,
+                {},
+
                 {
                     withCredentials: true,
                 },
             );
             console.log(response);
             toast.success("Logout successful!");
-            // goto("/login");
+            goto("/login");
         } catch (error) {
             console.error(error);
             toast.error("Logout failed!");
@@ -40,7 +40,7 @@
     <Card class="w-[350px]">
         <CardHeader class="flex flex-col items-center gap-2">
             <img
-                src={avatarUrl}
+                src={user.avatar}
                 alt="Profile"
                 class="w-24 h-24 rounded-full object-cover border-4 border-primary shadow"
             />
@@ -53,6 +53,5 @@
             >
         </CardContent>
     </Card>
-
     <Button onclick={logout}>Logout</Button>
 </div>
