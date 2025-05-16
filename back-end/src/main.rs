@@ -3,17 +3,18 @@ mod db;
 mod handlers;
 mod models;
 use std::env;
+mod middleware;
 
 use axum::{
     http::{header, HeaderValue, Method}, middleware::from_fn_with_state, routing::get, Extension, Router
 };
 use tokio::net::TcpListener;
 use tower_cookies::CookieManagerLayer;
-use tower_http::cors::{Any, CorsLayer};
+use tower_http::cors::{ CorsLayer};
 
-use routes::auth::auth_routes;
+use routes::{auth::auth_routes, body::{body_routes}};
 use handlers::auth_handlers::me;
-use handlers::jwt::auth_middleware;
+use middleware::auth_middleware::auth_middleware;
 
 
 #[tokio::main]
@@ -38,7 +39,8 @@ async fn main(){
     
     let app = Router::new()
     .nest("/auth", auth_routes(pool.clone()))
-    .nest("/api", protected)
+    .nest("/api", protected,)
+    .nest("/api", body_routes(pool.clone()))
      .layer(CookieManagerLayer::new())
     .layer(Extension(pool.clone()))
     .layer(cors);
