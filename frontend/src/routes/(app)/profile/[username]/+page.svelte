@@ -35,7 +35,7 @@
 </script>
 
 <div
-    class="flex flex-col gap-4 justify-center items-center min-h-screen bg-gray-50"
+    class="flex flex-col gap-4 justify-center items-center min-h-screen"
 >
     <Card class="w-[350px]">
         <CardHeader class="flex flex-col items-center gap-2">
