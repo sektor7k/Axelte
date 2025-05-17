@@ -248,3 +248,57 @@ pub async fn get_page(
 
     Ok((StatusCode::OK, Json(page)))
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct RenamePagePayload {
+    pub id: String,
+    pub title: String,
+}
+
+pub async fn rename_page(
+    Extension(pool): Extension<MySqlPool>,
+    Extension(user): Extension<User>,
+    Json(payload): Json<RenamePagePayload>,
+) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> {
+    let result = sqlx::query!(
+        "UPDATE pages SET title = ? WHERE id = ? AND created_by = ?",
+        payload.title,
+        payload.id,
+        user.id
+    )
+    .execute(&pool)
+    .await
+    .map_err(|_| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({ "message": "Database error" })),
+        )
+    })?;
+    Ok((StatusCode::OK, Json(json!({ "message": "Page renamed successfully" }))))
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct DeletePagePayload {
+    pub id: String,
+}
+
+pub async fn delete_page(
+    Extension(pool): Extension<MySqlPool>,
+    Extension(user): Extension<User>,
+    Json(payload): Json<DeletePagePayload>,
+) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> {
+    let result = sqlx::query!(
+        "DELETE FROM pages WHERE id = ? AND created_by = ?",
+        payload.id,
+        user.id
+    )
+    .execute(&pool)
+    .await
+    .map_err(|_| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({ "message": "Database error" })),
+        )
+    })?;
+    Ok((StatusCode::OK, Json(json!({ "message": "Page deleted successfully" }))))
+}
