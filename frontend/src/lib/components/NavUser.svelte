@@ -3,10 +3,11 @@
     import Settings from "@lucide/svelte/icons/settings";
     import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
     import AvatarUser from "./AvatarUser.svelte";
-    import { User } from "@lucide/svelte";
+    import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, User } from "@lucide/svelte";
     import axios from "axios";
     import { toast } from "svelte-sonner";
     import { goto } from "$app/navigation";
+    import * as Avatar  from "./ui/avatar";
 
     export let user;
 
@@ -30,33 +31,58 @@
 </script>
 
 <DropdownMenu.Root>
-    <DropdownMenu.Trigger class="">
-        <AvatarUser avatarurl={user.avatar}/>
+    <DropdownMenu.Trigger>
+        <div
+            class="flex items-center gap-2 px-1 py-1.5 text-left text-sm rounded-lg hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+        >
+            <Avatar.Root class="h-8 w-8 rounded-lg">
+                <Avatar.Image src={user.avatar} alt={user.username} />
+                <Avatar.Fallback class="rounded-lg">CN</Avatar.Fallback>
+            </Avatar.Root>
+            <div class="grid flex-1 text-left text-sm leading-tight">
+                <span class="truncate font-semibold">{user.username}</span>
+                <span class="truncate text-xs">{user.email}</span>
+            </div>
+            <ChevronsUpDown class="ml-auto size-4" />
+        </div>
     </DropdownMenu.Trigger>
-    <DropdownMenu.Content class="w-56">
+    <DropdownMenu.Content
+        class="w-[var(--bits-dropdown-menu-anchor-width)] min-w-56 rounded-lg"
+        side={"bottom"}
+        align="end"
+        sideOffset={4}
+    >
+        <DropdownMenu.Label class="p-0 font-normal">
+            <div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                <Avatar.Root class="h-8 w-8 rounded-lg">
+                    <Avatar.Image src={user.avatar} alt={user.username} />
+                    <Avatar.Fallback class="rounded-lg">CN</Avatar.Fallback>
+                </Avatar.Root>
+                <div class="grid flex-1 text-left text-sm leading-tight">
+                    <span class="truncate font-semibold">{user.username}</span>
+                    <span class="truncate text-xs">{user.email}</span>
+                </div>
+            </div>
+        </DropdownMenu.Label>
+        <DropdownMenu.Separator />
         <DropdownMenu.Group>
-            <DropdownMenu.GroupHeading class="text-sm font-normal text-gray-400"
-                >{user.username}</DropdownMenu.GroupHeading
-            >
-            <DropdownMenu.GroupHeading class="text-sm font-normal text-gray-400"
-                >{user.email}</DropdownMenu.GroupHeading
-            >
-            <DropdownMenu.Separator />
-            <DropdownMenu.Group>
-                <DropdownMenu.Item onclick={() => goto(`/profile/${user.username}`)}>
-                    <User class="mr-2 size-4" />
-                    <span>Profile</span>
-                </DropdownMenu.Item>
-                <DropdownMenu.Item>
-                    <Settings class="mr-2 size-4" />
-                    <span>Settings</span>
-                </DropdownMenu.Item>
-            </DropdownMenu.Group>
-            <DropdownMenu.Separator />
-            <DropdownMenu.Item onclick={logout}>
-                <LogOut class="mr-2 size-4" />
-                <span>Log out</span>
+            <DropdownMenu.Item onSelect={() => goto(`/profile/${user.username}`)}>
+                <BadgeCheck />
+                Account
+            </DropdownMenu.Item>
+            <DropdownMenu.Item>
+                <CreditCard />
+                Billing
+            </DropdownMenu.Item>
+            <DropdownMenu.Item>
+                <Bell />
+                Notifications
             </DropdownMenu.Item>
         </DropdownMenu.Group>
+        <DropdownMenu.Separator />
+        <DropdownMenu.Item onSelect={logout}>
+            <LogOut />
+            Log out
+        </DropdownMenu.Item>
     </DropdownMenu.Content>
 </DropdownMenu.Root>
