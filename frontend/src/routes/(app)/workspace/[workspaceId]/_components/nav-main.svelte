@@ -10,10 +10,13 @@
 	import { toast } from "svelte-sonner";
 	import { goto } from "$app/navigation";
 	import { pages } from '$lib/stores/pages';
+	import PageActions from "./page-actions.svelte";
 
 	let workspaceId = $page.params.workspaceId;
 	let pageName = $state("");
 	let isDialogOpen = $state(false);
+
+	const currentPage = $derived(() => $pages.find((p: { id: string }) => p.id === $page.params.pageId));
 
 	async function handleCreatePage() {
 		try {
@@ -50,6 +53,10 @@
 			keepFocus: true
 		});
 	}
+
+	function truncateTitle(title: string, maxLength: number = 20) {
+		return title.length > maxLength ? title.slice(0, maxLength) + '...' : title;
+	}
 </script>
 
 <Sidebar.Group>
@@ -57,20 +64,33 @@
 	<Sidebar.Menu>
 		{#each $pages as page (page.id)}
 			<Sidebar.MenuItem>
-				<Sidebar.MenuButton onclick={() => navigateToPage(page.id)}>
-					<FileText />
-					<span>{page.title}</span>
+				<Sidebar.MenuButton
+					class={currentPage()?.id === page.id ? "bg-sidebar-accent text-sidebar-accent-foreground" : ""}
+					onclick={() => navigateToPage(page.id)}
+				>
+					<div class="flex items-center justify-between w-full">
+						<div class="flex items-center gap-2">
+							<FileText class="w-5 h-5"/>
+							<span>{truncateTitle(page.title, 20)}</span>
+						</div>
+						<PageActions
+							pageId={page.id}
+							pageTitle={page.title}
+						/>
+					</div>
 				</Sidebar.MenuButton>
 			</Sidebar.MenuItem>
 		{/each}
 		<Sidebar.MenuItem>
-			<Sidebar.MenuButton>
+			<Sidebar.MenuButton class="w-full">
 				<Dialog.Root bind:open={isDialogOpen}>
-					<Dialog.Trigger>
-						<div class="flex w-full items-center gap-2 overflow-hidden">
+					<Dialog.Trigger class="w-full">
+						
+						<div class="flex items-center justify-start gap-2 overflow-hidden">
 							<Plus />
 							<span>New Page</span>
 						</div>
+					
 					</Dialog.Trigger>
 					<Dialog.Content class="sm:max-w-[425px]">
 						<Dialog.Header>
