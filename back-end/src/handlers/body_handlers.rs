@@ -164,8 +164,9 @@ pub async fn get_workspace_pages(
 
     let pages = sqlx::query_as!(
         Page,
-        "SELECT id, title, workspace_id FROM pages WHERE workspace_id = ?",
-        workspace_id
+        "SELECT id, title, workspace_id FROM pages WHERE workspace_id = ? AND created_by = ?",
+        workspace_id,
+        user.id
     )
     .fetch_all(&pool)
     .await
@@ -192,24 +193,58 @@ pub async fn create_page(
 ) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> {
     let page_id = Uuid::new_v4().to_string();
     let result = sqlx::query!(
-        "INSERT INTO pages (id, title, workspace_id) VALUES (?, ?, ?)",
+        "INSERT INTO pages (id, title, workspace_id, created_by) VALUES (?, ?, ?, ?)",
         page_id,
         payload.title,
-        payload.workspace_id
+        payload.workspace_id,
+        user.id
     )
     .execute(&pool)
     .await
     .map_err(|_| {
         (
             StatusCode::INTERNAL_SERVER_ERROR,
-            Json(json!({ "message": "Database error",
-            "page_id": page_id
-             })),
+            Json(json!({ "message": "Database error"})),
         )
     })?;
 
     Ok((
         StatusCode::OK,
-        Json(json!({ "message": "Page created successfully" })),
+        Json(json!({ "message": "Page created successfully",
+        "page_id": page_id
+         })),
     ))
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct PageResponse {
+    pub id: String,
+    pub title: String,
+    pub workspace_id: String,
+    pub created_by: String,
+    pub content: Option<String>,
+}
+
+pub async fn get_page(
+    Extension(pool): Extension<MySqlPool>,
+    Extension(user): Extension<User>,
+    Path(page_id): Path<String>,
+) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> {
+
+    let page = sqlx::query_as!(
+        PageResponse,
+        "SELECT id, title, workspace_id, created_by,content FROM pages WHERE id = ? AND created_by = ?",
+        page_id,
+        user.id
+    )
+    .fetch_optional(&pool)
+    .await
+    .map_err(|_| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({ "message": "Database error" })),
+        )
+    })?;
+
+    Ok((StatusCode::OK, Json(page)))
 }
