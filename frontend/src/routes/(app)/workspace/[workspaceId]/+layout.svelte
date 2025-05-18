@@ -18,15 +18,15 @@
 </script>
   
 <Sidebar.Provider>
-  <div class="flex h-screen">
+  <div class="flex h-full w-full">
     <!-- 1) Sol: AppSidebar -->
     <AppSidebar workspaces={workspaces} pages={pages} user={user} />
 
     <!-- 2) Sağ: Header + İçerik -->
-    <div class="flex flex-1 flex-col overflow-hidden">
+    <div class="flex flex-1 flex-col ">
       <!-- Navbar / Breadcrumb -->
       <header
-        class="flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4 transition-[height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12"
+        class="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4 transition-[height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12"
       >
         <Sidebar.Trigger class="-ml-1" />
         <Separator orientation="vertical" class="mr-2 h-4" />
@@ -53,7 +53,7 @@
       </header>
 
       <!-- Dinamik Sayfa İçeriği -->
-      <main class="flex-1 overflow-auto p-4">
+      <main class="h-full w-full overflow-hidden">
         <slot />
       </main>
     </div>

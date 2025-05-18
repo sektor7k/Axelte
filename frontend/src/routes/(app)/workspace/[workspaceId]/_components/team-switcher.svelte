@@ -55,7 +55,7 @@
 				<DropdownMenu.Label class="text-muted-foreground text-xs">Workspaces</DropdownMenu.Label>
 				{#each workspaces as workspace, index (workspace.id)}
 					<DropdownMenu.Item 
-						onSelect={() => goto(`/workspace/${workspace.id}`)} 
+						onSelect={() => window.location.href = `/workspace/${workspace.id}`} 
 						class="gap-2 p-2"
 					>
 						<div class="flex size-6 items-center justify-center rounded-sm border">

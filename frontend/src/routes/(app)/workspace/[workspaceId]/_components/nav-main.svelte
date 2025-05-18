@@ -28,13 +28,15 @@
 				withCredentials: true,
 			}
 		);
-		isDialogOpen = false;
-		
-		// Add the new page to the store
 		pages.addPage({
 			id: response.data.page_id,
 			title: pageName
 		});
+		isDialogOpen = false;
+		pageName = "";
+		
+		// Add the new page to the store
+		
 
 		await goto(`/workspace/${workspaceId}/page/${response.data.page_id}`, {
 			replaceState: true,
