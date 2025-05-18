@@ -1,8 +1,9 @@
 use axum::{extract::Path, http::StatusCode, response::IntoResponse, Extension, Json};
 use serde::{Deserialize, Serialize};
-use serde_json::json;
+use serde_json::{json, Value};
 use sqlx::MySqlPool;
 use uuid::Uuid;
+use sqlx::types::*;
 
 use crate::models::user::User;
 
@@ -222,7 +223,7 @@ pub struct PageResponse {
     pub title: String,
     pub workspace_id: String,
     pub created_by: String,
-    pub content: Option<String>,
+    pub content: Option<Value>,
 }
 
 pub async fn get_page(
@@ -301,4 +302,34 @@ pub async fn delete_page(
         )
     })?;
     Ok((StatusCode::OK, Json(json!({ "message": "Page deleted successfully" }))))
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct UpdatePagePayload {
+    pub id: String,
+    pub content: Value,
+}
+
+pub async fn update_page(
+    Extension(pool): Extension<MySqlPool>,
+    Extension(user): Extension<User>,
+    Json(payload): Json<UpdatePagePayload>,
+) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> {
+
+
+    let result = sqlx::query!(
+        "UPDATE pages SET content = ? WHERE id = ? AND created_by = ?",
+        sqlx::types::Json(payload.content),
+        payload.id,
+        user.id
+    )
+    .execute(&pool)
+    .await
+    .map_err(|_| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({ "message": "Database error" })),
+        )
+    })?;
+    Ok((StatusCode::OK, Json(json!({ "message": "Page updated successfully" }))))
 }
