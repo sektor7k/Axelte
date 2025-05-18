@@ -5,9 +5,15 @@
     import * as Sidebar from '$lib/components/ui/sidebar';
     import { pages } from '$lib/stores/pages';
     import { page } from '$app/stores';
+    import { activeUsers } from '$lib/stores/awareness';
+    import { onMount } from 'svelte';
 
     export let data;
     let { workspaces, pages: initialPages, user } = data;
+
+    onMount(() => {
+    activeUsers.set([]);
+  });
     
     // Initialize pages store with server data
     $: pages.set(initialPages);
@@ -50,6 +56,13 @@
             </Breadcrumb.Item>
           </Breadcrumb.List>
         </Breadcrumb.Root>
+        {#if $activeUsers.length}
+    <div class="flex items-center gap-2">
+      {#each $activeUsers as u}
+        <img src={u.avatar} alt={u.name} class="w-6 h-6 rounded-full" title={u.name} style="border:2px solid {u.color}" />
+      {/each}
+    </div>
+  {/if}
       </header>
 
       <!-- Dinamik Sayfa İçeriği -->

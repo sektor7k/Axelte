@@ -3,12 +3,15 @@
   import axios from 'axios';
   export let data;
  
-  $: page = data.page; // page.id ve page.content var
+      $: page = data.page;
+      const{user,} = data;
 
   let saveTimeout: ReturnType<typeof setTimeout>;
   let isSaving = false;
   let lastSaved = '';
 
+
+  
   function handleUpdate(event: CustomEvent<string>) {
     const json = event.detail;
     
@@ -80,7 +83,9 @@
 
 <div class="page-container">
   <div class="w-full max-w-4xl flex-1">
-    <Editor page={page} on:update={handleUpdate} />
+    {#key page.id}
+    <Editor page={page} user={user} on:update={handleUpdate} />
+    {/key}
   </div>
   
   <div class="status-indicator">

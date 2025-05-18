@@ -44,12 +44,17 @@
   "dependencies": {
     "@lucide/svelte": "^0.511.0",
     "@tiptap/core": "^2.12.0",
+    "@tiptap/extension-collaboration": "^2.12.0",
+    "@tiptap/extension-collaboration-cursor": "^2.12.0",
     "@tiptap/extension-link": "^2.12.0",
     "@tiptap/extension-placeholder": "^2.12.0",
     "@tiptap/extension-underline": "^2.12.0",
     "@tiptap/starter-kit": "^2.12.0",
     "axios": "^1.9.0",
     "embla-carousel-autoplay": "^8.5.2",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "svelte-store": "^0.0.2",
+    "y-websocket": "^3.0.0",
+    "yjs": "^13.6.27"
   }
 }
