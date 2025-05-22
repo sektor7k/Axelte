@@ -51,10 +51,12 @@
 		workspaces=[], 
 		pages, 
 		user,
+		userRole,
 		ref = $bindable(null),
 		collapsible = "icon" as "icon" | "none" | "offcanvas",
 		...restProps
 	} = $props();
+
 </script>
 
 <Sidebar.Root bind:ref {collapsible} {...restProps}>
@@ -62,7 +64,7 @@
 		<TeamSwitcher workspaces={workspaces}/>
 	</Sidebar.Header>
 	<Sidebar.Content>
-		<NavMain />
+		<NavMain userRole={userRole} />
 		<NavProjects projects={data.projects} />
 	</Sidebar.Content>
 	<Sidebar.Footer>

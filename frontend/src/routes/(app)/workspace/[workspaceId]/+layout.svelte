@@ -8,8 +8,13 @@
     import { activeUsers } from '$lib/stores/awareness';
     import { onMount } from 'svelte';
 
+    interface WorkspaceMember {
+        user_id: string;
+        role: 'owner' | 'editor' | 'viewer';
+    }
+
     export let data;
-    let { workspaces, pages: initialPages, user } = data;
+    let { workspaces, pages: initialPages, user, workspaceMembers } = data;
 
     onMount(() => {
     activeUsers.set([]);
@@ -21,12 +26,15 @@
     // Aktif workspace ve page'ı bul
     $: currentWorkspace = workspaces.find(ws => ws.id === $page.params.workspaceId);
     $: currentPage = initialPages.find(p => p.id === $page.params.pageId);
+
+    // Kullanıcının workspace içindeki rolünü bul
+    $: userRole = (workspaceMembers as WorkspaceMember[])?.find(member => member.user_id === user.id)?.role || 'viewer';
 </script>
   
 <Sidebar.Provider>
   <div class="flex h-full w-full">
     <!-- 1) Sol: AppSidebar -->
-    <AppSidebar workspaces={workspaces} pages={pages} user={user} />
+    <AppSidebar workspaces={workspaces} pages={pages} user={user} userRole={userRole} />
 
     <!-- 2) Sağ: Header + İçerik -->
     <div class="flex flex-1 flex-col ">

@@ -20,6 +20,7 @@
 
   export let page;
   export let user; // { id, name, color, avatar }
+  export let disabled = false;
   const dispatch = createEventDispatcher();
   let editor: Editor;
   let container: HTMLDivElement;
@@ -30,6 +31,7 @@
   let provider: WebsocketProvider;
 
   onMount(async () => {
+    console.log(page.content);
     await tick(); // Wait for container to be assigned
 
     // Setup Yjs doc and WebSocket provider for collaboration
@@ -40,24 +42,23 @@
       ydoc,
     );
 
-    const randomHexColor = '#' + Math.floor(Math.random() * 0xFFFFFF)
-    .toString(16)
-    .padStart(6, '0');
+    const randomHexColor =
+      "#" +
+      Math.floor(Math.random() * 0xffffff)
+        .toString(16)
+        .padStart(6, "0");
 
     // Set local user state for awareness
-    provider.awareness.setLocalStateField('user', {
-    ...user,
-    color: randomHexColor
-  });
+    provider.awareness.setLocalStateField("user", {
+      ...user,
+      color: randomHexColor,
+    });
     provider.awareness.on("change", () => {
       // 1) Tüm awareness durumlarını al
       const states = Array.from(provider.awareness.getStates().values());
 
-      
-
       // 2) Sadece user objelerini çıkar, undefined'ları at
       const users = states.map((s) => s.user).filter(Boolean) as Array<{
-        
         id: string;
         name: string;
         color: string;
@@ -94,40 +95,49 @@
         CollaborationCursor.configure({
           provider,
           user,
-          render: remoteUser => {
-  // Create main wrapper element
-  const wrapper = document.createElement("div");
-  wrapper.className = "absolute flex items-center -left-28 transform -translate-y-6 pointer-events-none z-20 transition-all duration-200";
-  
-  // Get user color or use default
-  const userColor = remoteUser.color || "#3b82f6";
-  
-  // Create HTML with improved styling
-  wrapper.innerHTML = `
+          render: (remoteUser) => {
+            // Create main wrapper element
+            const wrapper = document.createElement("div");
+            wrapper.className =
+              "absolute flex items-center -left-28 transform -translate-y-6 pointer-events-none z-20 transition-all duration-200";
+
+            // Get user color or use default
+            const userColor = remoteUser.color || "#3b82f6";
+
+            // Create HTML with improved styling
+            wrapper.innerHTML = `
     <div class="flex items-center justify-center gap-2 bg-white dark:bg-gray-800 rounded-full px-0 pr-2 shadow-sm border" style="border-color: ${userColor}">
       <img src="${remoteUser.avatar}" class="w-6 h-6 rounded-full object-cover border border-gray-100" alt="${remoteUser.username}'s avatar" />
       <span class="font-medium text-xs text-gray-800 dark:text-gray-200">${remoteUser.username}</span>
     </div>
     <span class="text-lg mx-1" style="color: ${userColor}">▶</span>
   `;
-  
-  return wrapper;
-},
-          selectionRender: () => ({ class: '' }),
-        })
+
+            return wrapper;
+          },
+          selectionRender: () => ({ class: "" }),
+        }),
       ],
       content: page.content || "",
       autofocus: "start",
+      editable: !disabled,
       editorProps: {
         attributes: {
           class: "outline-none prose prose-invert max-w-full px-4 py-2",
         },
       },
-      onUpdate: ({ editor }) => dispatch("update", editor.getJSON()),
       onSelectionUpdate: ({ editor }) => {
-        selection = !editor.state.selection.empty;
-        showToolbar = selection;
+        if (!disabled) {
+          selection = !editor.state.selection.empty;
+          showToolbar = selection;
+        }
       },
+    });
+
+    ydoc.on("update", (update: Uint8Array, origin: any) => {
+      if (!disabled && origin !== provider) {
+        dispatch("update", editor.getJSON());
+      }
     });
   });
 
@@ -150,7 +160,7 @@
     </div>
   </div>
 
-  {#if showToolbar && editor}
+  {#if showToolbar && editor && !disabled}
     <div class="toolbar" transition:fade={{ duration: 100 }}>
       <button
         class:active={isActive("heading", { level: 1 })}
@@ -224,7 +234,7 @@
     </div>
   {/if}
 
-  <div bind:this={container} class="editor-content"></div>
+  <div bind:this={container} class="editor-content" class:disabled></div>
 </div>
 
 <style>
@@ -237,6 +247,11 @@
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     min-height: calc(100vh - 80px);
+  }
+
+  .disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
   }
 
   .toolbar {
@@ -303,8 +318,8 @@
     font-size: 12px;
     color: #9ca3af;
   }
- /* Caret & avatar wrapper */
- :global(.remote-cursor-wrapper) {
+  /* Caret & avatar wrapper */
+  :global(.remote-cursor-wrapper) {
     position: absolute;
     left: -20px;
     display: flex;
@@ -318,7 +333,7 @@
     height: 16px;
     border-radius: 50%;
     border: 1px solid white;
-    box-shadow: 0 0 2px rgba(0,0,0,0.5); 
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
     margin-bottom: 20px;
   }
   :global(.remote-cursor-arrow) {
@@ -329,7 +344,8 @@
   }
 
   /* Hide default Yjs cursor */
-  :global(.yjs-cursor), :global(.yjs-cursor-label) {
+  :global(.yjs-cursor),
+  :global(.yjs-cursor-label) {
     display: none !important;
   }
 </style>

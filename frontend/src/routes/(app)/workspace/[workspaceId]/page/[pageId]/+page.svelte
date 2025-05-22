@@ -3,23 +3,28 @@
   import axios from 'axios';
   export let data;
  
-      $: page = data.page;
-      const{user,} = data;
+  $: page = data.page;
+  const { user, workspaceMembers } = data;
+  interface WorkspaceMember {
+    user_id: string;
+    role: 'owner' | 'editor' | 'viewer';
+  }
+  $: userRole = (workspaceMembers as WorkspaceMember[])?.find(member => member.user_id === user.id)?.role || 'viewer';
+  $: canEdit = userRole === 'owner' || userRole === 'editor';
 
   let saveTimeout: ReturnType<typeof setTimeout>;
   let isSaving = false;
   let lastSaved = '';
 
-
-  
   function handleUpdate(event: CustomEvent<string>) {
+    if (!canEdit) return; // Eğer düzenleme yetkisi yoksa güncellemeyi engelle
+    
     const json = event.detail;
     
     clearTimeout(saveTimeout);
     isSaving = true;
     
     saveTimeout = setTimeout(() => {
-      console.log("istek");
       axios.post(`${import.meta.env.VITE_SERVER_URL}/api/update-page`, 
       {
           id: page.id,
@@ -84,7 +89,7 @@
 <div class="page-container">
   <div class="w-full max-w-4xl flex-1">
     {#key page.id}
-    <Editor page={page} user={user} on:update={handleUpdate} />
+    <Editor page={page} user={user} disabled={!canEdit} on:update={handleUpdate} />
     {/key}
   </div>
   

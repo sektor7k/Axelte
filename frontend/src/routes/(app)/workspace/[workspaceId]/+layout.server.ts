@@ -19,7 +19,16 @@ export const load: LayoutServerLoad = async ({ params, fetch }) => {
         credentials: 'include'
       }
   );
+
+  const workspaceMembersRes = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/workspaces/${params.workspaceId}/members`,
+    {
+        credentials: 'include'
+      }
+  );
+  const workspaceMembers = await workspaceMembersRes.json();
+ 
+
   const pages: { id: string; title: string }[] = await pagesRes.json();
 
-  return { workspaces, pages };
+  return { workspaces, pages, workspaceMembers };
 };

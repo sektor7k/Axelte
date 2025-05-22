@@ -13,10 +13,13 @@
 	import PageActions from "./page-actions.svelte";
 
 	let workspaceId = $page.params.workspaceId;
+	let { userRole } = $props<{ userRole: 'owner' | 'editor' | 'viewer' }>();
 	let pageName = $state("");
 	let isDialogOpen = $state(false);
 
 	const currentPage = $derived(() => $pages.find((p: { id: string }) => p.id === $page.params.pageId));
+	const canEdit = $derived(userRole === 'owner' || userRole === 'editor');
+
 
 	async function handleCreatePage() {
 		try {
@@ -54,6 +57,7 @@
 			replaceState: true,
 			keepFocus: true
 		});
+		console.log(userRole);
 	}
 
 	function truncateTitle(title: string, maxLength: number = 20) {
@@ -75,18 +79,21 @@
 							<FileText class="w-5 h-5"/>
 							<span>{truncateTitle(page.title, 20)}</span>
 						</div>
+						{#if canEdit}
 						<PageActions
 							pageId={page.id}
 							pageTitle={page.title}
 						/>
+						{/if}
 					</div>
 				</Sidebar.MenuButton>
 			</Sidebar.MenuItem>
 		{/each}
+		{#if canEdit}
 		<Sidebar.MenuItem>
 			<Sidebar.MenuButton class="w-full">
 				<Dialog.Root bind:open={isDialogOpen}>
-					<Dialog.Trigger class="w-full">
+					<Dialog.Trigger class="w-full" disabled={!canEdit}>
 						
 						<div class="flex items-center justify-start gap-2 overflow-hidden">
 							<Plus />
@@ -118,5 +125,6 @@
 				</Dialog.Root>
 			</Sidebar.MenuButton>
 		</Sidebar.MenuItem>
+		{/if}
 	</Sidebar.Menu>
 </Sidebar.Group>
