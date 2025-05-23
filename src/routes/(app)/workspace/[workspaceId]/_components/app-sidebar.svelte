@@ -10,27 +10,6 @@
 	import Settings2 from "@lucide/svelte/icons/settings-2";
 	import SquareTerminal from "@lucide/svelte/icons/square-terminal";
 
-	// This is sample data.
-	const data = {
-		
-		projects: [
-			{
-				name: "Design Engineering",
-				url: "#",
-				icon: Frame,
-			},
-			{
-				name: "Sales & Marketing",
-				url: "#",
-				icon: ChartPie,
-			},
-			{
-				name: "Travel",
-				url: "#",
-				icon: Map,
-			},
-		],
-	};
 
 
     
@@ -65,7 +44,7 @@
 	</Sidebar.Header>
 	<Sidebar.Content>
 		<NavMain userRole={userRole} />
-		<NavProjects projects={data.projects} />
+		<NavProjects  />
 	</Sidebar.Content>
 	<Sidebar.Footer>
 		<NavUser user={user} />
