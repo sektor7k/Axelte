@@ -134,6 +134,11 @@
       },
     });
 
+    // Eğer content JSON ise yükle
+    // if (page.content && typeof page.content === "object") {
+    //   editor.commands.setContent(page.content);
+    // }
+
     ydoc.on("update", (update: Uint8Array, origin: any) => {
       if (!disabled && origin !== provider) {
         dispatch("update", editor.getJSON());
