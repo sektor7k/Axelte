@@ -31,7 +31,7 @@
   let provider: WebsocketProvider;
 
   onMount(async () => {
-    console.log(page.content);
+
     await tick(); // Wait for container to be assigned
 
     // Setup Yjs doc and WebSocket provider for collaboration
@@ -133,7 +133,24 @@
         }
       },
     });
+    // İçerik yükleme kontrolü için flag
+  let initialContentLoaded = false;
 
+// YJS sync olayını dinle
+provider.on('sync', (isSynced) => {
+  if (isSynced && !initialContentLoaded && page.content) {
+    // YJS fragment'ını kontrol et
+    const yjsFragment = ydoc.getXmlFragment('default');
+    
+    // Eğer YJS dokümanı boşsa ve sayfa içeriği varsa yükle
+    if (yjsFragment.length === 0 && typeof page.content === "object") {
+      setTimeout(() => {
+        editor.commands.setContent(page.content);
+        initialContentLoaded = true;
+      }, 100); // Küçük bir gecikme ekle
+    }
+  }
+});
     // Eğer content JSON ise yükle
     // if (page.content && typeof page.content === "object") {
     //   editor.commands.setContent(page.content);
